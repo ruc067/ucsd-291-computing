@@ -1,1 +1,1 @@
-UCSD computing 291 course work
+UCSD computing 291
