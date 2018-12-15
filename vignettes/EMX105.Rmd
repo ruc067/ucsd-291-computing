@@ -1,0 +1,207 @@
+---
+title: "EMX105"
+author: "Ruifeng Chen"
+date: "2018/11/10"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(knitr)
+source('../R/tabll.R')
+```
+
+```{r}
+X105 <- read.csv("X105.csv", header = T)
+X105 <- data.matrix(X105)
+
+p.vec <- list()
+eta.mat<- list()
+
+for (i in 2:10){
+  set.seed(10)
+  t <- sample(1:20, size = i, replace = T)
+  set.seed(10)
+  p.vec[[i-1]] <- sample(1:20, size = i, replace = T)/sum(t)
+  
+  set.seed(10)
+  eta.mat.first <- runif(i,0,1)
+  
+  set.seed(10)
+  eta.mat.prop <- runif(1,0,1)
+  
+  eta.mat.second <- eta.mat.prop * (1-eta.mat.first)
+  eta.mat.third <- (1-eta.mat.prop) * (1-eta.mat.first)
+  
+  eta.mat[[i-1]] <- matrix(c(eta.mat.first, eta.mat.second, 
+                             eta.mat.third),ncol = 3)
+}
+```
+
+```{r}
+loglikelihood.first.update1 <- NULL
+p.vec.updated <- list()
+eta.mat.update <- list()
+
+for(i in 2:10){
+  loglikelihood.first.update1[i-1] <- (updatell(p.vec[[i-1]], 
+                                                eta.mat[[i-1]], X105,
+                                                n.iter=50))$loglikelihood
+  
+  p.vec.updated[[i-1]] <- (updatell(p.vec[[i-1]], eta.mat[[i-1]], X105, 
+                                    n.iter=50))$p.vec
+  
+  eta.mat.update[[i-1]] <- (updatell(p.vec[[i-1]], eta.mat[[i-1]], X105, 
+                                     n.iter=50))$eta.mat
+}
+
+loglikelihood.second.update1 <- NULL
+
+for(i in 2:10){
+  loglikelihood.second.update1[i-1] <- (updatell(p.vec.updated[[i-1]], 
+                                                 eta.mat.update[[i-1]], 
+                                                 X105, 
+                                                 n.iter=50))$loglikelihood
+}
+
+```
+The loglikelihoods does non-decreasing as the number of components increases.
+
+Now we try another two more sets of starting values
+
+The first one:
+```{r}
+p.vec <- list()
+eta.mat<- list()
+
+for (i in 2:10){
+  set.seed(100)
+  t <- sample(1:20, size = i, replace = T)
+  set.seed(100)
+  p.vec[[i-1]] <- sample(1:20, size = i, replace = T)/sum(t)
+  
+  set.seed(100)
+  eta.mat.first <- runif(i,0,1)
+  
+  set.seed(100)
+  eta.mat.prop <- runif(1,0,1)
+  
+  eta.mat.second <- eta.mat.prop * (1-eta.mat.first)
+  eta.mat.third <- (1-eta.mat.prop) * (1-eta.mat.first)
+  
+  eta.mat[[i-1]] <- matrix(c(eta.mat.first, eta.mat.second, 
+                             eta.mat.third),ncol = 3)
+}
+
+loglikelihood.first.update2 <- NULL
+p.vec.updated <- list()
+eta.mat.update <- list()
+
+for(i in 2:10){
+  loglikelihood.first.update2[i-1] <- (updatell(p.vec[[i-1]], 
+                                                eta.mat[[i-1]], 
+                                                X105, 
+                                                n.iter=50))$loglikelihood
+  
+  p.vec.updated[[i-1]] <- (updatell(p.vec[[i-1]], 
+                                    eta.mat[[i-1]], 
+                                    X105, 
+                                    n.iter=50))$p.vec
+  
+  eta.mat.update[[i-1]] <- (updatell(p.vec[[i-1]], 
+                                     eta.mat[[i-1]], 
+                                     X105, 
+                                     n.iter=50))$eta.mat
+}
+
+loglikelihood.second.update2 <- NULL
+
+for(i in 2:10){
+  loglikelihood.second.update2[i-1] <- (updatell(p.vec.updated[[i-1]], 
+                                                 eta.mat.update[[i-1]], 
+                                                 X105, 
+                                                 n.iter=50))$loglikelihood
+}
+```
+
+The second one:
+```{r}
+p.vec <- list()
+eta.mat<- list()
+
+for (i in 2:10){
+  set.seed(2018)
+  t <- sample(1:20, size = i, replace = T)
+  set.seed(2018)
+  p.vec[[i-1]] <- sample(1:20, size = i, replace = T)/sum(t)
+  
+  set.seed(2018)
+  eta.mat.first <- runif(i,0,1)
+  
+  set.seed(2018)
+  eta.mat.prop <- runif(1,0,1)
+  
+  eta.mat.second <- eta.mat.prop * (1-eta.mat.first)
+  eta.mat.third <- (1-eta.mat.prop) * (1-eta.mat.first)
+  
+  eta.mat[[i-1]] <- matrix(c(eta.mat.first, eta.mat.second, 
+                             eta.mat.third),ncol = 3)
+}
+
+loglikelihood.first.update3 <- NULL
+p.vec.updated <- list()
+eta.mat.update <- list()
+
+for(i in 2:10){
+  loglikelihood.first.update3[i-1] <- (updatell(p.vec[[i-1]], 
+                                                eta.mat[[i-1]], 
+                                                X105, 
+                                                n.iter=50))$loglikelihood
+  
+  p.vec.updated[[i-1]] <- (updatell(p.vec[[i-1]], 
+                                    eta.mat[[i-1]], 
+                                    X105, 
+                                    n.iter=50))$p.vec
+  
+  eta.mat.update[[i-1]] <- (updatell(p.vec[[i-1]], 
+                                     eta.mat[[i-1]], 
+                                     X105, 
+                                     n.iter=50))$eta.mat
+}
+
+loglikelihood.second.update3 <- NULL
+
+for(i in 2:10){
+  loglikelihood.second.update3[i-1] <- (updatell(p.vec.updated[[i-1]], 
+                                                 eta.mat.update[[i-1]], 
+                                                 X105, 
+                                                 n.iter=50))$loglikelihood
+}
+```
+
+For all of three sets of starting values, we set iterations to 50. The log likelihood for the three cases are summarized in the table below:
+
+```{r}
+loglikelihood.second.update <- data.frame(loglikelihood.second.update1,loglikelihood.second.update2,
+                                          loglikelihood.second.update3)
+
+colnames(loglikelihood.second.update) <- c("set1","set2","set3")
+
+rownames(loglikelihood.second.update) <- c("M=2","M=3","M=4","M=5","M=6","M=7","M=8","M=9","M=10")
+
+kable(loglikelihood.second.update)
+```
+
+I guess the mixture components there is 6.
+
+\newpage
+## Appendix
+```{r eval=FALSE, code=readLines("../R/tabll.R")}
+
+```
+

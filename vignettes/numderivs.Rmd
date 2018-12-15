@@ -1,0 +1,135 @@
+---
+title: "numderivs"
+author: "Ruifeng Chen"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+h <- NULL
+
+for (i in 1:64){
+  h[i] <- 2^(-i)
+}
+```
+
+Approximations to the derivative of a function f. There are three methods to get the derivarive.
+
+(1) forward difference quotient (for a step size h):
+$$\partial_F(f,x,h) = \frac{f(x+h)-f(x)}{h}$$
+
+(2) symmetric difference quotient (for a step size h):
+$$\partial_S(f,x,h) = \frac{f(x+h)-f(x-h)}{2h}$$
+(3) when the function f is analytic near x:
+$$\partial_C(f,x,h) = \frac{\Im(f(x+hi))}{h}$$
+where $i = \sqrt{-1}$ is the imaginary unit and $\Im(z)$ is the imaginary part of the complex number z.
+
+We choose a few functions and argument values and examine these approximations graphically. The y axis will denote the derivative, and x axis will denote $-log_2h$, where h is shown above.
+
+The first example we use is $f_1(x) = sin(x)$ at $x = 1$.
+```{r}
+x <- 1
+derivative1 <- NULL
+derivative2 <- NULL
+derivative3 <- NULL
+```
+
+```{r}
+#derivative1
+for(i in 1:64){
+  derivative1[i] <- (sin(x + h[i]) - sin(x)) / h[i]
+}
+plot(seq(1:64), derivative1, main = "forward difference quotient")
+```
+
+```{r}
+#derivative2
+for(i in 1:64){
+  derivative2[i] <- (sin(x + h[i]) - sin(x - h[i])) / (2*h[i])
+}
+plot(seq(1:64), derivative2, main = "symmetric difference quotient")
+```
+
+```{r}
+#derivative3
+for(i in 1:64){
+  derivative3[i] <- Im(sin(complex(real = x, imaginary = h[i])))/h[i]
+}
+plot(seq(1:64), derivative3, main = "the third derivative method")
+```
+
+In the first example, we can see that derivatives derived by three methods respectively are quite stable among h values $2^{10}$ to $2^{40}$. However, they are unstable with very small or very large h values.
+
+
+The second example we use is $f_2(x) = 10000sin(x)$ at $x = 1$.
+```{r}
+x <- 1
+derivative1 <- NULL
+derivative2 <- NULL
+derivative3 <- NULL
+```
+
+```{r}
+for(i in 1:64){
+  derivative1[i] <- 10000 * (sin(x + h[i]) - sin(x)) / h[i]
+}
+plot(seq(1:64), derivative1, main = "forward difference quotient")
+```
+
+```{r}
+for(i in 1:64){
+  derivative2[i] <- 10000 * (sin(x + h[i]) - sin(x - h[i])) / (2*h[i])
+}
+plot(seq(1:64), derivative2, main = "symmetric difference quotient")
+```
+
+```{r}
+for(i in 1:64){
+  derivative3[i] <- Im(10000*sin(complex(real = x, imaginary = h[i])))/h[i]
+}
+plot(seq(1:64), derivative3, main = "the third derivative method")
+```
+
+In the second example, the result is very similar to the first example.
+
+The third example we use is $f_3(x) = tan(x)$ at $x = 1.59$.
+```{r}
+x <- 1.59
+derivative1 <- NULL
+derivative2 <- NULL
+derivative3 <- NULL
+```
+
+```{r}
+for(i in 1:64){
+  derivative1[i] <- (tan(x + h[i]) - tan(x)) / h[i]
+}
+plot(seq(1:64), derivative1, main = "forward difference quotient")
+```
+
+```{r}
+for(i in 1:64){
+  derivative2[i] <- (tan(x + h[i]) - tan(x - h[i])) / (2*h[i])
+}
+plot(seq(1:64), derivative2, main = "symmetric difference quotient")
+```
+
+```{r}
+for(i in 1:64){
+  derivative3[i] <- Im(tan(complex(real = x, imaginary = h[i]))) / h[i]
+}
+plot(seq(1:64), derivative3, main = "the third derivative method")
+```
+
+In the third example, we can see that derivatives derived by three methods respectively are quite stable among h values $2^{10}$ to $2^{50}$. However, they are unstable with very small or very large h values.
+
+In all the three examples, we can see that these derivatives are quite stable in the middle range, but unstable with extreme values. This is due to floating
+point arithmetic.
+
+This suggests that in practice, we can choose size h among $2^{-20}$ to $2^{-40}$ to get pretty stable derivatives.
+

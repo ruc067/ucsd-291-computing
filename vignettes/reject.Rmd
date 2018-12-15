@@ -1,0 +1,64 @@
+---
+title: "reject"
+author: "Ruifeng Chen"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source('../R/rlnp.R')
+```
+
+**Rejection Sampling**
+
+We want to create a RNG for a density f, here it's called dlnp. Sometimes it's hard to get through inverse CDF, thus we use rejection sampling instead. By using rejection sampling, we sample candidates from an easier distribution g, here we choose cauchy distribution as function g. Then we choose M s.t. $M * g(x) \geq f(x)$ for any x, then we sample x from g and y from Uniform(0,1), and if $y \leq f(x)/(g(x)*M)$, we return x, otherwise we reject x. We use M defined above, times the chosen cauchy function g, as our envelope to cover the target density function dlnp. The location of cauchy distribution is chosen as the mode of function f found by optimise in r, and the scale of cauchy distribution is given. 
+
+
+**Exmaple 1**
+
+The first example we show is rlnp(10000,0), that is we generate 10000 random points from lnp distribution with y equals 0 and scale equals 1 as default.
+
+In the plot below, the red points are what we accpet as random points generated from distribution lnp with y equals 0, and 10000 red points in total. The black points represents the rejected points which are under the envelope but above the target function f.The acceptance fraction is 0.39.
+```{r}
+rlnpPlot(rlnp(10000, 0))
+```
+
+**Exmaple 2**
+
+The second example we show is rlnp(10000,3), that is we generate 10000 random points from lnp distribution with y equals 3 and scale equals 1 as default.
+
+In the plot below, the red points are what we accpet as random points generated from distribution lnp with y equals 3, and 10000 red points in total. The black points represents the rejected points which are under the envelope but above the target function f.The acceptance fraction is 0.55.
+
+It may reply that with the value of y increases, the fraction decreases.
+```{r}
+rlnpPlot(rlnp(10000, 3))
+```
+
+Then we plot rlnp(10000, 100, scale = 1). After that, we want to find the best scale which could give us the smallest rejection fraction. We choose the candidate scale within(0.08,0.09,0.1,0.11,0.12) and found that when scale equals 0.11, we get the smallest rejection fraction
+```{r}
+rlnpPlot(rlnp(10000, 100))
+
+rejection.frac <- NULL
+k=1
+for(i in seq(0.08,0.12,by=0.01)){
+  rejection.frac[k] <- sum((rlnp(10000, 100, scale=i))$keep==0)/length((rlnp(10000, 100, scale=i))$keep)
+  k <- k+1
+}
+
+target <- which(rejection.frac == min(rejection.frac))
+
+rlnpPlot(rlnp(10000, 100, seq(0.08,0.12,by=0.01)[target]))
+
+```
+
+Sometimes the values of the dratio element for each run of rlnp might exceed 1, but very close to 1. I round the dratio to 6 decimal to avoid that problem. Since the value is very close to 1, I think the flaw is not that serious in our case.
+
+```{r eval=FALSE, code=readLines("../R/rlnp.R")}
+
+```
+

@@ -1,0 +1,94 @@
+---
+title: "trimean"
+author: "Ruifeng Chen"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(knitr)
+```
+
+```{r}
+N <- 10000
+Z <- matrix(NA, nrow = N, ncol = 9)
+V2 <- matrix(NA, nrow = N, ncol = 9)
+V3 <- matrix(NA, nrow = N, ncol = 9)
+
+set.seed(2018)
+for (i in 1:N){
+  Z[i,] <- rnorm(9)
+  V2[i,] <- sqrt(rchisq(9, 4)/4)
+  V3[i,] <- sqrt(rchisq(9, 10)/10)
+}
+
+X1 <- Z
+X2 <- Z/V2
+X3 <- Z/V3
+
+var.normal <- mean(apply(X1, 1, function(x) mean(sort(x)[c(3,5,5,7)]))^2)
+sd.normal <- sd(apply(X1, 1, function(x) mean(sort(x)[c(3,5,5,7)]))^2) / sqrt(N)
+
+var.t4 <- mean(apply(X2, 1, function(x) mean(sort(x)[c(3,5,5,7)]))^2)
+sd.t4 <- sd(apply(X2, 1, function(x) mean(sort(x)[c(3,5,5,7)]))^2 / sqrt(N))
+
+var.t10 <- mean(apply(X3, 1, function(x) mean(sort(x)[c(3,5,5,7)]))^2)
+sd.t10 <- sd(apply(X3, 1, function(x) mean(sort(x)[c(3,5,5,7)]))^2 / sqrt(N))
+```
+
+```{r}
+X1.hat <- apply(X1, 1, sum) / 9
+X2.hat <- apply(X2*V2, 1, sum) / apply(V2^2, 1, sum)
+X3.hat <- apply(X3*V3, 1, sum) / apply(V3^2, 1, sum)
+
+S1square.hat <- apply((X1 - X1.hat)^2, 1, sum) / 8
+S2square.hat <- apply((X2 - X2.hat)^2 * V2^2, 1, sum) / 8
+S3square.hat <- apply((X3 - X3.hat)^2 * V3^2, 1, sum) / 8
+
+C1 <- (X1 - X1.hat) / sqrt(S1square.hat)
+C2 <- (X2 - X2.hat) / sqrt(S2square.hat)
+C3 <- (X3 - X3.hat) / sqrt(S3square.hat)
+
+var.normal.reduction <- (1 / 9) + mean(apply(C1, 1, 
+                                                function(x) mean(sort(x)[c(3,5,5,7)]))^2)
+sd.normal.reduction <- sd(apply(C1, 1, 
+                                function(x) mean(sort(x)[c(3,5,5,7)]))^2 / sqrt(N))
+
+var.t4.reduction <- 4/(4 * 9 - 2) + mean(apply(C2, 1, 
+                                               function(x) mean(sort(x)[c(3,5,5,7)]))^2)
+sd.t4.reduction <- sd(apply(C2, 1, 
+                            function(x) mean(sort(x)[c(3,5,5,7)]))^2 / sqrt(N))
+
+var.t10.reduction <- 10/(10 * 9 - 2) + mean(apply(C3, 1, 
+                                                  function(x) mean(sort(x)[c(3,5,5,7)]))^2)
+sd.t10.reduction <- sd(apply(C3, 1, 
+                             function(x) mean(sort(x)[c(3,5,5,7)]))^2 / sqrt(N))
+
+```
+
+```{r}
+var.original <- c(var.normal, var.t4, var.t10)
+
+var.updated <- c(var.normal.reduction, var.t4.reduction, var.t10.reduction)
+
+sd.original <- c(sd.normal, sd.t4, sd.t10)
+
+sd.updated <- c(sd.normal.reduction, sd.t4.reduction, sd.t10.reduction)
+
+proportion <- 1 - sd.updated^2 / sd.original^2
+
+output <- matrix(c(var.original, var.updated, sd.original, sd.updated, proportion), nrow = 3)
+rownames(output) <- c("standard normal", "t with df 4", "t with df 10")
+colnames(output) <- c("variance estimation", "se of variance estimation", 
+                      "variance estimation by variance reduction", 
+                      "se of variance estimation by variance reduction", 
+                      "improved proportion")
+kable(output[,1:3])
+kable(output[,4:5])
+
+
+```
+

@@ -1,0 +1,45 @@
+---
+title: "pareto-intro"
+author: "Ruifeng Chen"
+date: "2018/10/17"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The package dpareto could calculate the density of pareto distribution. The main function of dpareto package is function dpareto, which would call Rcpp to calculate density of pareto distribution in a fast way. 
+```{r}
+library(pareto)
+```
+
+In total, there's 4 arguments for function dpareto, they are x, $\alpha$, $\beta$ and log. The density of pareto distribution is:
+$$f(x|\alpha,\beta) = \frac{\beta\alpha^{\beta}}{x^{\beta+1}}$$
+The log argument is TRUE or FALSE, which indicates whether we want a log density or not.
+
+The function is fully vectorized thus all of x, $\alpha$ and $\beta$ could be vectors. Obviously, it means we can get multi-densities simultaneously.
+
+There's an simple example with $x=3$, $\alpha = 2$, $\beta=2$
+```{r}
+dpareto(x = 3,alpha = 2,beta = 2,log = FALSE)
+```
+
+There's another example with vectorized x, $\alpha$ and $\beta$
+```{r}
+dpareto(x = c(3,4,5),alpha = c(2,3),beta = 2,log = FALSE)
+```
+
+In addition, we if any of $\alpha$ or $\beta$ is negative or NaN, the density would be NaN
+```{r}
+dpareto(x = c(3,4,5),alpha = c(-2,3),beta = 2,log = FALSE)
+dpareto(x = c(3,4,5),alpha = c(2,3),beta = -2,log = FALSE)
+```
+
+Furthermore, when the x is less than $\alpha$, the density should be 0.
+```{r}
+dpareto(x = c(3,3,5),alpha = c(2,4),beta = 2,log = FALSE)
+```
+

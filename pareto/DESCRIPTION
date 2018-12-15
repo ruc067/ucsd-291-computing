@@ -1,0 +1,13 @@
+Package: pareto
+Type: Package
+Title: Calculate pdf/cdf/quantile of pareto distribution
+Version: 1.1
+Date: 2018-10-31
+Author: Ruifeng Chen
+Maintainer: Ruifeng Chen <ruc067@ucsd.edu>
+Description: Calculate pdf/cdf/quantile of pareto distribution. It's fully vectorized.
+License: GPL ( >= 3.0)
+Imports: Rcpp (>= 0.12.16)
+LinkingTo: Rcpp
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr

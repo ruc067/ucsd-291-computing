@@ -1,0 +1,120 @@
+---
+title: "Pareto Distribution"
+output:
+  rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{Pareto Distribution}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+bibliography: ["Rrefs.bib"]
+biblio-style: "apalike"
+link-citations: true
+---
+
+```{r echo=FALSE}
+library(knitr)
+library(pareto)
+```
+
+# Introduction
+
+The `pareto` package will compute pdf, cdf and quantile of pareto distribution.
+
+# Pareto distribution
+Pareto distribution has density function:
+$$f(x|\alpha,\beta) = \frac{\beta\alpha^{\beta}}{x^{\beta+1}}$$
+with $0<\alpha\leq{x}$ and $\beta>0$
+
+# compute pdf of pareto distribution
+
+Function "dpareto" will compute the pdf of pareto distribution. It will call dpareto.cpp to complete computation which takes advantage of rcpp to do fast calculation. There're four arguments x,$\alpha$, $\beta$ and log (with default FALSE).The function is fully vectorized.
+
+There's an simple example with $x=c(3,4)$, $\alpha = c(2,3)$, $\beta=2$
+```{r}
+dpareto(c(3,4),c(2,3),2)
+```
+
+When either $\alpha$ or $\beta$ is less or equal to 0, function dpareto will return NaN.
+
+```{r}
+dpareto(3,-1,2)
+dpareto(3,1,0)
+```
+
+In addition, when x is less than $\alpha$, the pareto density is obviously 0.
+
+```{r}
+dpareto(1.9,2,2)
+```
+
+Furthermore, we can ask function dpareto to return log density with argument "log = T"
+
+```{r}
+dpareto(3,2,2, log = T)
+```
+
+An example plot of pareto density, with $\alpha=2$ and $\beta=2$
+```{r}
+x <- seq(2,20,length.out = 1000)
+
+plot(x,dpareto(x,alpha=2,beta=2), main = "pareto density(alpha = beta = 2)", ylab = "density")
+```
+
+# compute cdf of pareto distribution
+
+Function "ppareto" will compute the cdf of pareto distribution. There're three arguments x,$\alpha$ and $\beta$. The function is fully vectorized.
+
+There's an simple example with $x=c(3,4)$, $\alpha = c(2,3)$, $\beta=2$
+```{r}
+ppareto(c(3,4),c(2,3),2)
+```
+
+Also, when either $\alpha$ or $\beta$ is less or equal to 0, function ppareto will return NaN.
+
+```{r}
+ppareto(3,-1,2)
+ppareto(3,1,0)
+```
+
+# compute quantile of pareto distribution
+
+Function "qpareto" will compute the quantile of pareto distribution. There're three arguments p,$\alpha$ and $\beta$. The function is fully vectorized.
+
+```{r, warning=FALSE}
+qpareto(c(0.3,0.4,0.5),2,3)
+```
+
+Also, when either $\alpha$ or $\beta$ is less or equal to 0, function qpareto will return NaN.
+
+```{r}
+qpareto(0.3,-1,2)
+qpareto(0.3,1,0)
+```
+
+A table of pareto ($\alpha=2$,$\beta=2$) pdf and cdf
+
+```{r}
+x.table <- seq(3,10,by = 1)
+
+p.pdf <- dpareto(x.table,alpha = 2,beta = 2)
+
+p.cdf <- ppareto(x.table,alpha = 2,beta = 2)
+
+p.table <- data.frame(x.table, p.pdf, p.cdf)
+
+names(p.table) <- c("x", "pdf", "cdf")
+
+kable(p.table)
+```
+
+
+# Acknowledgement
+
+This document depended on the packages
+
+* markdown [@R-markdown]
+* knitr [@R-knitr]
+
+# References
+
+* Pareto [@Pareto]

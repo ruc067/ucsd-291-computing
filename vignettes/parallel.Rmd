@@ -1,0 +1,46 @@
+---
+title: "parallel"
+author: "Ruifeng Chen"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source("../R/rlnp.R")
+library( parallel )
+```
+
+Function "mclapply" in library "parallel" allows us to run parallel analysis simutaneously using multiple cores.
+
+In our setting, we want to generate n random samples from a distribution whose density is
+proportional to dlnp(x, 10). Let's first run a comparably tiny sample, to generate 300000 random sample from dlnp(x, y = 10, scale = 1). By setting mc.set.seed equals TRUE, we are ensured not re-using the same random numbers in different samples. 
+
+We can see that without parallel computing, the elapsed time for generating 300000 random samples from density dlnp(x, y = 10, scale = 1) is around 0.5 seconds. However, if we set the cores to 3, the elapsed time fall down to around 0.2 seconds. To double check we are actually not re-using the same random numbers in different samples, we conduct an example to check the length of unique random numbers we generated, and we can see the length is actually very close to 300000.
+```{r}
+system.time( rlnpx(300000, 10, 1) )
+
+system.time( mclapply( X = rep(100000,3), 
+                       FUN = function(x) rlnpx(x, 10, 1), 
+                       mc.cores=3L, mc.set.seed = TRUE) )
+
+rlnp300000 <- mclapply( X = rep(100000,3), 
+                        FUN = function(x) rlnpx(x, 10, 1), 
+                        mc.cores=3L, mc.set.seed = TRUE)
+
+length(unique(unlist(rlnp300000)))
+```
+
+Now, we generate 5e6 random samples from density dlnp(x, y = 10, scale = 1), and to compare the elapsed time with (cores equals to 3) and without parallel computing.
+```{r}
+(t1 <- system.time( rlnpx(5000000, 10, 1) ))
+
+(t2 <- system.time( mclapply( X = c(1700000,1700000,1600000), 
+                              FUN = function(x) rlnpx(x, 10, 1), 
+                              mc.cores=3L, mc.set.seed = TRUE) ))
+```
+At last, we can see that the elapsed time with parallel computing (with 3 cores) is `r t2[3]`, without parallel computing, the elapsed time is `r t1[3]`
